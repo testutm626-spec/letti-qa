@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="ko" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Letti QA 대시보드</title>
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Noto+Sans+KR:wght@400;500;700&display=swap"
+    />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            fontFamily: {
+              display: ["Space Grotesk", "Noto Sans KR", "sans-serif"],
+              body: ["Noto Sans KR", "sans-serif"],
+            },
+            colors: {
+              ink: "#0B0F1A",
+              mist: "#E2E8F0",
+              neon: "#7CFFB2",
+              glow: "#4CC9F0",
+              dusk: "#1B2335",
+              ember: "#FF9F68",
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      body {
+        font-family: "Noto Sans KR", sans-serif;
+        background: radial-gradient(circle at 15% 20%, rgba(76, 201, 240, 0.2), transparent 55%),
+          radial-gradient(circle at 85% 10%, rgba(124, 255, 178, 0.15), transparent 45%),
+          linear-gradient(160deg, #0b0f1a 0%, #111827 50%, #0b0f1a 100%);
+        min-height: 100vh;
+      }
+      .glass {
+        background: rgba(15, 23, 42, 0.72);
+        backdrop-filter: blur(16px);
+        border: 1px solid rgba(148, 163, 184, 0.15);
+      }
+      .card-hover {
+        transition: transform 0.25s ease, box-shadow 0.25s ease;
+      }
+      .card-hover:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 20px 40px rgba(15, 23, 42, 0.4);
+      }
+      .tag {
+        background: rgba(148, 163, 184, 0.15);
+        border: 1px solid rgba(148, 163, 184, 0.3);
+      }
+      .scrollbar::-webkit-scrollbar {
+        width: 8px;
+      }
+      .scrollbar::-webkit-scrollbar-thumb {
+        background: rgba(148, 163, 184, 0.3);
+        border-radius: 999px;
+      }
+      .toast-enter {
+        animation: toast-in 0.35s ease;
+      }
+      @keyframes toast-in {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      .fade-in {
+        animation: fade-in 0.4s ease;
+      }
+      @keyframes fade-in {
+        from {
+          opacity: 0;
+          transform: translateY(6px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+    </style>
+  </head>
+  <body class="text-slate-100">
+    <div class="max-w-7xl mx-auto px-4 py-10">
+      <header class="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+        <div class="space-y-3">
+          <p class="text-sm uppercase tracking-[0.4em] text-slate-400">Letti QA</p>
+          <h1 class="text-3xl md:text-4xl font-display font-semibold">시나리오 운영 대시보드</h1>
+          <p class="text-slate-300 max-w-2xl">
+            QA 시나리오를 한 곳에서 관리하고, 충돌을 확인하며 Playwright 테스트로 즉시 변환하세요.
+          </p>
+        </div>
+        <div class="flex flex-wrap gap-3">
+          <button
+            id="refreshButton"
+            class="px-4 py-2 rounded-full bg-slate-800 hover:bg-slate-700 border border-slate-600/40 text-sm"
+          >
+            새로 고침
+          </button>
+          <button
+            id="conflictButton"
+            class="px-4 py-2 rounded-full bg-ember/90 text-slate-900 font-semibold hover:bg-ember"
+          >
+            충돌 검사 실행
+          </button>
+        </div>
+      </header>
+
+      <section class="mt-10 grid gap-6 lg:grid-cols-[1.4fr_1fr]">
+        <div class="glass rounded-3xl p-6">
+          <h2 class="text-xl font-display font-semibold">새 시나리오 추가</h2>
+          <p class="text-sm text-slate-400 mt-2">
+            한 줄 설명을 입력하면 5~8개의 상세 시나리오가 자동 생성됩니다.
+          </p>
+          <form id="addForm" class="mt-4 flex flex-col gap-3 md:flex-row">
+            <input
+              id="inputField"
+              type="text"
+              placeholder="예: 배경 제거 기능에서 업로드 오류 처리 확인"
+              class="flex-1 rounded-2xl bg-slate-900/60 border border-slate-700/60 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-glow/60"
+            />
+            <button
+              type="submit"
+              class="rounded-2xl bg-neon text-slate-900 font-semibold px-6 py-3 hover:opacity-90"
+            >
+              시나리오 생성
+            </button>
+          </form>
+          <div class="mt-6 grid gap-4 md:grid-cols-3">
+            <div class="rounded-2xl bg-slate-900/60 border border-slate-700/40 p-4">
+              <p class="text-sm text-slate-400">전체 그룹</p>
+              <p id="totalGroups" class="text-2xl font-display font-semibold mt-2">0</p>
+            </div>
+            <div class="rounded-2xl bg-slate-900/60 border border-slate-700/40 p-4">
+              <p class="text-sm text-slate-400">전체 시나리오</p>
+              <p id="totalScenarios" class="text-2xl font-display font-semibold mt-2">0</p>
+            </div>
+            <div class="rounded-2xl bg-slate-900/60 border border-slate-700/40 p-4">
+              <p class="text-sm text-slate-400">마지막 동기화</p>
+              <p id="lastSync" class="text-base text-slate-200 mt-2">-</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="glass rounded-3xl p-6">
+          <h2 class="text-xl font-display font-semibold">충돌 요약</h2>
+          <p class="text-sm text-slate-400 mt-2">시나리오 간 유사도 기반 충돌 신호를 보여줍니다.</p>
+          <div id="conflictSummary" class="mt-6 space-y-3">
+            <div class="rounded-2xl bg-slate-900/60 border border-slate-700/40 p-4 text-slate-300">
+              아직 충돌 정보가 없습니다.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="mt-12">
+        <div class="flex items-center justify-between">
+          <h2 class="text-2xl font-display font-semibold">시나리오 그룹</h2>
+          <p class="text-sm text-slate-400">카드를 눌러 상세 시나리오를 확인하세요.</p>
+        </div>
+        <div id="groupsContainer" class="mt-6 grid gap-6 md:grid-cols-2"></div>
+      </section>
+    </div>
+
+    <div
+      id="testModal"
+      class="fixed inset-0 bg-slate-950/70 hidden items-center justify-center px-4 py-8"
+    >
+      <div class="glass rounded-3xl w-full max-w-4xl p-6">
+        <div class="flex items-start justify-between gap-4">
+          <div>
+            <h3 class="text-xl font-display font-semibold">생성된 테스트 코드</h3>
+            <p id="testFileName" class="text-sm text-slate-400 mt-1">-</p>
+          </div>
+          <button
+            id="closeModal"
+            class="px-3 py-1 rounded-full bg-slate-800 hover:bg-slate-700 text-sm"
+          >
+            닫기
+          </button>
+        </div>
+        <pre
+          id="testContent"
+          class="mt-6 bg-slate-950/80 rounded-2xl p-4 text-sm text-slate-200 overflow-auto max-h-[60vh] scrollbar"
+        ></pre>
+      </div>
+    </div>
+
+    <div id="toastContainer" class="fixed bottom-6 right-6 space-y-3 z-50"></div>
+
+    <script src="/app.js"></script>
+  </body>
+</html>

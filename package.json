@@ -11,13 +11,16 @@
     "build": "tsc -p tsconfig.json",
     "start": "node dist/cli.js",
     "dev": "tsc -p tsconfig.json --watch",
-    "test": "tsc -p tsconfig.json"
+    "test": "tsc -p tsconfig.json",
+    "serve": "node dist/server.js"
   },
   "dependencies": {
     "commander": "^11.0.0",
+    "express": "^4.19.2",
     "js-yaml": "^4.1.0"
   },
   "devDependencies": {
+    "@types/express": "^4.17.21",
     "@types/js-yaml": "^4.0.9",
     "@types/node": "^20.10.5",
     "typescript": "^5.5.4"
