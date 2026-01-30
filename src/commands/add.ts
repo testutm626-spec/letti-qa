@@ -10,13 +10,8 @@ export async function handleAdd(input: string | undefined): Promise<void> {
     return;
   }
 
-  const apiKey = process.env.CLAUDE_API_KEY || process.env.ANTHROPIC_API_KEY;
-  if (!apiKey) {
-    console.log("Claude API 키가 없습니다. CLAUDE_API_KEY 환경 변수를 설정해 주세요.");
-    return;
-  }
-
-  const scenarios = await expandScenarios(input, { apiKey });
+  // Uses Codex OAuth token automatically if logged in, or OPENAI_API_KEY env var
+  const scenarios = await expandScenarios(input, {});
   const groupId = randomUUID();
   const group: ScenarioGroup = {
     id: groupId,
