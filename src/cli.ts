@@ -4,6 +4,7 @@ import { handleAdd } from "./commands/add";
 import { handleList } from "./commands/list";
 import { handleGenerate } from "./commands/generate";
 import { handleCheck } from "./commands/check";
+import { handleSetup, checkFirstRun } from "./commands/setup";
 
 const program = new Command();
 
@@ -67,7 +68,28 @@ program
     await handleCheck();
   });
 
-program.parseAsync(process.argv).catch((error) => {
+program
+  .command("setup")
+  .description("초기 설정 마법사 실행")
+  .action(async () => {
+    await handleSetup();
+  });
+
+// Check for first run before executing commands
+async function main() {
+  const args = process.argv.slice(2);
+  const isSetupCommand = args[0] === "setup";
+  const isHelpCommand = args.includes("--help") || args.includes("-h") || args.includes("-V") || args.includes("--version");
+  
+  // Only check first run for non-setup, non-help commands
+  if (!isSetupCommand && !isHelpCommand && args.length > 0) {
+    await checkFirstRun();
+  }
+  
+  await program.parseAsync(process.argv);
+}
+
+main().catch((error) => {
   console.error("실행 중 오류가 발생했습니다:", error);
   process.exitCode = 1;
 });

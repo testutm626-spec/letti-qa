@@ -1,4 +1,4 @@
-import { spawn } from "child_process";
+import { spawn, spawnSync } from "child_process";
 import { ExpandedScenario } from "./types";
 
 export type AIOptions = {
@@ -6,10 +6,38 @@ export type AIOptions = {
   timeout?: number;
 };
 
+export function checkCodexInstalled(): boolean {
+  const result = spawnSync("which", ["codex"], { stdio: "pipe" });
+  return result.status === 0;
+}
+
 export async function expandScenarios(
   userInput: string,
   options: AIOptions = {}
 ): Promise<ExpandedScenario[]> {
+  // Check if codex is installed
+  if (!checkCodexInstalled()) {
+    console.error("");
+    console.error("╔══════════════════════════════════════════════════════════════╗");
+    console.error("║  ❌ Codex CLI가 설치되어 있지 않습니다!                      ║");
+    console.error("╚══════════════════════════════════════════════════════════════╝");
+    console.error("");
+    console.error("   Codex는 Letti QA가 AI를 사용하기 위해 필요합니다.");
+    console.error("");
+    console.error("   📋 설치 방법:");
+    console.error("   1. npm install -g @openai/codex");
+    console.error("");
+    console.error("   2. Anthropic API 키 설정:");
+    console.error("      export ANTHROPIC_API_KEY=sk-ant-...");
+    console.error("");
+    console.error("   3. 설치 확인:");
+    console.error("      codex --version");
+    console.error("");
+    console.error("   📖 자세한 정보: https://github.com/openai/codex");
+    console.error("");
+    throw new Error("Codex CLI가 설치되어 있지 않습니다. 위 안내를 따라 설치해 주세요.");
+  }
+
   const prompt = buildPrompt(userInput);
   const responseText = await callCodex(prompt, options);
   const parsed = safeJsonParse(responseText);
