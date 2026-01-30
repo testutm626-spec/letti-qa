@@ -1,0 +1,25 @@
+{
+  "name": "letti-qa",
+  "version": "0.1.0",
+  "description": "Letti QA CLI",
+  "type": "commonjs",
+  "bin": {
+    "letti-qa": "dist/cli.js"
+  },
+  "main": "dist/cli.js",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/cli.js",
+    "dev": "tsc -p tsconfig.json --watch",
+    "test": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "commander": "^11.0.0",
+    "js-yaml": "^4.1.0"
+  },
+  "devDependencies": {
+    "@types/js-yaml": "^4.0.9",
+    "@types/node": "^20.10.5",
+    "typescript": "^5.5.4"
+  }
+}
